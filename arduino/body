@@ -1,0 +1,94 @@
+#include <HijelHID_BLEKeyboard.h>
+
+HijelHID_BLEKeyboard keyboard("Remote Body");
+
+// Pin
+const int BTN_BACK     = 7;
+const int BTN_MUTE     = 6;
+const int BTN_SHORTCUT = 5;
+const int BTN_HOME     = 8;
+const int BTN_VOL_DN   = 9;
+const int BTN_VOL_UP   = 10;
+
+void setup() {
+    Serial.begin(115200);
+
+    pinMode(BTN_BACK,     INPUT_PULLUP);
+    pinMode(BTN_HOME,     INPUT_PULLUP);
+    pinMode(BTN_MUTE,     INPUT_PULLUP);
+    pinMode(BTN_VOL_UP,   INPUT_PULLUP);
+    pinMode(BTN_VOL_DN,   INPUT_PULLUP);
+    pinMode(BTN_SHORTCUT, INPUT_PULLUP);
+
+    keyboard.setLogLevel(HIDLogLevel::Normal);
+    keyboard.begin();
+
+    Serial.println("Ready. Connetti via Bluetooth.");
+}
+
+void loop() {
+    if (!keyboard.isPaired()) {
+        static unsigned long lastPrint = 0;
+        if (millis() - lastPrint > 3000) {
+            Serial.println("Waiting for connection...");
+            lastPrint = millis();
+        }
+        return;
+    }
+
+    if (digitalRead(BTN_BACK) == LOW) {
+        delay(50);
+        if (digitalRead(BTN_BACK) == LOW) {
+            Serial.println("BACK");
+            keyboard.tap(KEY_ESCAPE);
+            while (digitalRead(BTN_BACK) == LOW) { delay(10); }
+        }
+    }
+
+    if (digitalRead(BTN_HOME) == LOW) {
+        delay(50);
+        if (digitalRead(BTN_HOME) == LOW) {
+            Serial.println("HOME");
+            keyboard.tap(KEY_H);
+            while (digitalRead(BTN_HOME) == LOW) { delay(10); }
+        }
+    }
+
+    if (digitalRead(BTN_MUTE) == LOW) {
+        delay(50);
+        if (digitalRead(BTN_MUTE) == LOW) {
+            Serial.println("MUTE");
+            keyboard.tap(MEDIA_MUTE);
+            while (digitalRead(BTN_MUTE) == LOW) { delay(10); }
+        }
+    }
+
+    if (digitalRead(BTN_VOL_UP) == LOW) {
+        delay(50);
+        if (digitalRead(BTN_VOL_UP) == LOW) {
+            Serial.println("VOL+");
+            keyboard.tap(MEDIA_VOLUME_UP);
+            while (digitalRead(BTN_VOL_UP) == LOW) { delay(10); }
+        }
+    }
+
+    if (digitalRead(BTN_VOL_DN) == LOW) {
+        delay(50);
+        if (digitalRead(BTN_VOL_DN) == LOW) {
+            Serial.println("VOL-");
+            keyboard.tap(MEDIA_VOLUME_DOWN);
+            while (digitalRead(BTN_VOL_DN) == LOW) { delay(10); }
+        }
+    }
+
+    if (digitalRead(BTN_SHORTCUT) == LOW) {
+        delay(50);
+        if (digitalRead(BTN_SHORTCUT) == LOW) {
+            Serial.println("PRIME FITNESS");
+            keyboard.tap(KEY_F);
+            while (digitalRead(BTN_SHORTCUT) == LOW) { delay(10); }
+        }
+    }
+
+    delay(10);
+}
