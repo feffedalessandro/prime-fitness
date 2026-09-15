@@ -1,0 +1,57 @@
+#include <HijelHID_BLEKeyboard.h>
+
+HijelHID_BLEKeyboard keyboard("D-Pad Body");
+
+const int BTN_CENTRO = 5;
+const int BTN_GIU    = 8;
+const int BTN_SU     = 1;
+const int BTN_SX     = 4;
+const int BTN_DX     = 10;
+
+// Stato precedente di ogni bottone
+bool prevSU     = HIGH;
+bool prevGIU    = HIGH;
+bool prevSX     = HIGH;
+bool prevDX     = HIGH;
+bool prevCENTRO = HIGH;
+
+void setup() {
+    Serial.begin(115200);
+    pinMode(BTN_CENTRO, INPUT_PULLUP);
+    pinMode(BTN_GIU,    INPUT_PULLUP);
+    pinMode(BTN_SU,     INPUT_PULLUP);
+    pinMode(BTN_SX,     INPUT_PULLUP);
+    pinMode(BTN_DX,     INPUT_PULLUP);
+
+    keyboard.setLogLevel(HIDLogLevel::Normal);
+    keyboard.begin();
+    Serial.println("Ready. Connetti via Bluetooth.");
+}
+
+void handleButton(int pin, bool &prev, uint8_t key, const char* nome) {
+    bool curr = digitalRead(pin);
+    if (curr == LOW && prev == HIGH) {  // fronte di discesa = pressione
+        Serial.println(nome);
+        keyboard.tap(key);
+    }
+    prev = curr;
+}
+
+void loop() {
+    if (!keyboard.isPaired()) {
+        static unsigned long lastPrint = 0;
+        if (millis() - lastPrint > 3000) {
+            Serial.println("Waiting for connection...");
+            lastPrint = millis();
+        }
+        return;
+    }
+
+    handleButton(BTN_SU,     prevSU,     KEY_UP,    "SU");
+    handleButton(BTN_GIU,    prevGIU,    KEY_DOWN,  "GIU");
+    handleButton(BTN_SX,     prevSX,     KEY_LEFT,  "SX");
+    handleButton(BTN_DX,     prevDX,     KEY_RIGHT, "DX");
+    handleButton(BTN_CENTRO, prevCENTRO, KEY_SPACE, "CENTRO");
+
+    delay(10);
+}
